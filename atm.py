@@ -109,7 +109,7 @@ def withdraw(user_pin):
                 for row in reader:
                     #add all user dictionary from csv file to a list
                     all_user_list.append(row)
-                    
+
                 # loop through the list containing dictionaries of users "all_user_list""
                 for user in all_user_list:
                     if user["PIN"] == user_pin:
@@ -182,7 +182,8 @@ def main():
             ).title()
 
             if main_menu in ["B", "D", "W"]:
-                user_pin = auth_user()  # catch the returned auth_user
+                # catch the returned auth_user
+                user_pin = auth_user()  
                 if main_menu == "B":
                     check_balance(user_pin)
                 elif main_menu == "D":
