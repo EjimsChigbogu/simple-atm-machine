@@ -30,7 +30,6 @@ A command-line ATM simulation that handles basic banking operations like deposit
 
 
 ### 🛠️ In Progress / Planned
-- [ ] 
 - [ ] Transfer funds between users
 - [ ] Transaction history log (saved to `transactions.csv`)
 - [ ] Mini account statement (print last 5 transactions)
