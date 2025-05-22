@@ -1,8 +1,41 @@
 """
 ATM machine
 """
-
 import csv
+
+# ID user and display message 
+def greet_user(user_pin):
+    try:
+        with open("users.csv", "r") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                if row["PIN"] == user_pin:
+                    print(f"\nWelcome, {row['Name']}")
+    except FileNotFoundError as e:
+        file_name = e.filename
+        print(f" ⚠️ {file_name} was not found.")
+
+#Programm Menu 
+def main_menu():
+    print("""
+======= ATM MENU =======
+1. Loging
+2. Open Account
+3. Exit
+========================
+""")
+    
+#Programm Menu 
+def menu():
+    print("""
+======= ATM MENU =======
+1. Check Balance
+2. Deposit
+3. Withdraw
+4. Transfer
+5. Exit
+========================
+""")
 
 
 # auth_user function
@@ -11,7 +44,7 @@ def auth_user():
     while not auth_complete:
         try:
             # prompt for pin and then check the user Db to see if there a match
-            user_pin = str(input("\n>>> Enter 4 digits PIN to continue: "))
+            user_pin = input("\n>>> Enter 4-digits PIN to continue: ")
 
             # open CSV, read through and check if the user_pin is in PIN
             try:
@@ -40,7 +73,6 @@ def check_balance(user_pin):
             reader = csv.DictReader(file)
             for row in reader:
                 if row["PIN"] == user_pin:
-                    print(f"\n😊 Welcome back, {row['Name']}\n")
                     print(f"\n✅ Account balance: ${row['Balance']}\n")
     except FileNotFoundError as e:
         file_name = e.filename
@@ -61,7 +93,6 @@ def deposit(user_pin):
                 #loop through the list containing dictionaries of users "all_user_list""
                 for user in all_users_list:
                     if user["PIN"] == user_pin:
-                        print(f"\n😊 Welcome back, {user['Name']}\n")
                         #promt for amount since user exists
                         try:
                             deposit_amount = float(input(">>> Enter amount to deposit: "))
@@ -113,7 +144,6 @@ def withdraw(user_pin):
                 # loop through the list containing dictionaries of users "all_user_list""
                 for user in all_user_list:
                     if user["PIN"] == user_pin:
-                        print(f"\n😊 Welcome back, {user['Name']}\n")
                         #prompt for amount
                         try:
                             amount_withdraw = float(input(">>> Enter amount to withdraw: "))
@@ -161,41 +191,49 @@ def withdraw(user_pin):
             print("\n⚠️ Enter amout to withdraw\n")
 
 
-def exit():
-    print("\nThanks for banking with us, have a nice day!😊")
+def transfer():
+    pass
 
-
-def main():
-    while True:
-        # Display welcome message
-        print("\n------------------------------------------------------------")
-        print("Good day!!, Welcome to this ATM😊")
-        print("What would you like to do?, Choose from the menu codes below\n")
+def open_account():
+    open_acct_successful = False
+    while not open_acct_successful:
         try:
-            main_menu = str(
-                input(
-                    """> Check Balance. (B)\n
-> Deposit Money. (D)\n
-> Make a Withdraw. (W)\n
-> Exit (E).\n>>>: """
-                )
-            ).title()
+            #collect user details
+            full_name = input(">>> Enter your full name :").title()
 
-            if main_menu in ["B", "D", "W"]:
-                # catch the returned auth_user
-                user_pin = auth_user()  
-                if main_menu == "B":
-                    check_balance(user_pin)
-                elif main_menu == "D":
-                    deposit(user_pin)
-                elif main_menu == "W":
-                    withdraw(user_pin)
-            elif main_menu == "E":
-                exit()
-                break
-        except ValueError:
-            print(">>>⚠️ Choose from the Options")
+            #prompt for deposit amount, also validate for amount <5
+            while True:
+                try:
+                    initial_deposite = float(input(">>> Enter initial deposite amount (Min. $5): "))
+                    if initial_deposite < 5.0:
+                        print("\n⚠️ Initial deposit amount must be up to $5")
+                    elif initial_deposite >= 5.0:
+                        break
+                except ValueError:
+                    print("⚠️ Enter dollar value")
+                
+            #prompt for account PIN
+            pin = input(">>> Create 4-digit PIN: ")
+
+            #Run pin through Db to avoid users sharing same pin
+            with open("users.csv", "r") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    if pin == row["PIN"]:
+                        print("⚠️ This PIN already use ")
+                    else:
+                        try:
+                            with open("users.csv", "a", newline="") as file:
+                                add_user = csv.writer(file)
+                                add_user.writerow([pin, full_name, initial_deposite])
+                                open_acct_successful = True
+                                print("\n✅ Account created successfully")
+                                print(f"🎉 Welcome, {full_name}")
+                                break   
+                        except Exception as e:
+                            print(f"An error occures {e}")
+        except Exception as e:
+            print(f"Error occured {e}")
 
 
-if __name__ == "__main__":
-    main()
+
