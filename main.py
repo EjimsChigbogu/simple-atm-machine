@@ -1,4 +1,15 @@
-from atm import auth_user, deposit, withdraw, check_balance, main_menu, menu, greet_user, open_account
+from atm import (
+    auth_user,
+    deposit,
+    withdraw,
+    check_balance,
+    main_menu,
+    menu,
+    greet_user,
+    open_account,
+    logging,
+    mask_PIN,
+)
 
 
 def main():
@@ -9,8 +20,9 @@ def main():
 
         if choice == "1":
             user_pin = auth_user()
-            while True:                
+            while True:
                 greet_user(user_pin)
+
                 menu()
                 choice = input(">>> Choose an option (1-5): ").strip()
 
@@ -22,11 +34,13 @@ def main():
                     withdraw(user_pin)
                 elif choice == "4":
                     pass
-                elif choice ==  "5":
+                elif choice == "5":
                     print("👋 Thank you for using Simple ATM. Goodbye!")
+                    logging.info(f"LOGOUT_SUCCESSFULL - PIN: {mask_PIN(user_pin)}")
                     break
                 else:
-                    print("⚠️ Invalid option. Please select 1, 2, 3, 4, 5 or 6.")
+                    print("⚠️ Invalid option. Please select 1, 2, 3, 4 and 5.")
+                    logging.info(f"INVALID_MENU_CHOICE: {choice}")
 
         elif choice == "2":
             open_account()
@@ -35,6 +49,7 @@ def main():
             break
         else:
             print("⚠️ Invalid option. Please select 1, 2, or 3.")
+            logging.info(f"INVALID_MAIN_MENU_CHOICE: {choice}")
 
 
 if __name__ == "__main__":

@@ -28,10 +28,13 @@ A command-line ATM simulation that handles basic banking operations like deposit
       - Allows new users to create account
       - Exisiting users to login as well
 
+- [x] Transaction history log (saved to `atm.log`)
+      - Logs every transaction (deposit, withdraw, failed login, new account creation and basiclly anything that happens in the ATM that i feel like i want to know about)
+
+
 
 ### 🛠️ In Progress / Planned
 - [ ] Transfer funds between users
-- [ ] Transaction history log (saved to `transactions.csv`)
 - [ ] Mini account statement (print last 5 transactions)
 - [ ] PIN change feature
 - [ ] Lock account after multiple failed attempts
