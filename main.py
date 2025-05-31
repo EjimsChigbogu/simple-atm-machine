@@ -1,8 +1,9 @@
 from atm import (
     auth_user,
+     check_balance,
     deposit,
     withdraw,
-    check_balance,
+    transfer,
     main_menu,
     menu,
     greet_user,
@@ -33,7 +34,7 @@ def main():
                 elif choice == "3":
                     withdraw(user_pin)
                 elif choice == "4":
-                    pass
+                    transfer(user_pin)
                 elif choice == "5":
                     print("👋 Thank you for using Simple ATM. Goodbye!")
                     logging.info(f"LOGOUT_SUCCESSFULL - PIN: {mask_PIN(user_pin)}")

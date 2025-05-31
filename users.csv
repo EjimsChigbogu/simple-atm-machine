@@ -1,13 +1,13 @@
-PIN,Name,Balance
-1001,Alice Johnson,560.0
-1002,Bob Smith,300
-1003,Charlie Evans,750
-1004,Diana Roberts,620
-1005,Ethan Clark,400
-1006,Fiona Lewis,1000
-1007,George Hall,130.0
-1008,Hannah Scott,920
-1009,Ivan Moore,99.0
-1010,Jade Turner,972.43
-2002,Ejims Chigbogu,500.0
-1010,Ken Oj,10000.0
+PIN,Name,Balance,AccountNumber
+1001,Alice Johnson,560.0,300001
+1002,Bob Smith,300,300002
+1003,Charlie Evans,750,300003
+1004,Diana Roberts,620,300004
+1005,Ethan Clark,400,300005
+1006,Fiona Lewis,1000,300006
+1007,George Hall,130.0,300007
+1008,Hannah Scott,920,300008
+1009,Ivan Moore,99.0,300009
+1010,Jade Turner,972.43,300010
+2002,Ejims Chigbogu,500.0,300011
+1011,Ken Oj,10200.0,300012

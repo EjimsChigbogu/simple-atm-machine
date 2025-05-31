@@ -5,7 +5,8 @@ logging.basicConfig(
     filename="atm.log", level=logging.INFO, format="%(levelname)s - %(message)s - %(asctime)s"
 )
 
-#Mask user PIN in the log sheet
+
+# Mask user PIN in the log sheet
 def mask_PIN(user_pin):
     with open("users.csv", "r") as file:
         reader = csv.DictReader(file)
@@ -21,9 +22,9 @@ def greet_user(user_pin):
     try:
         with open("users.csv", "r") as file:
             reader = csv.DictReader(file)
-            for row in reader:
-                if row["PIN"] == user_pin:
-                    name = row["Name"]
+            for user in reader:
+                if user["PIN"] == user_pin:
+                    name = user["Name"]
                     print(f"\nWelcome, {name}")
     except FileNotFoundError as e:
         file_name = e.filename
@@ -67,9 +68,9 @@ def auth_user():
             try:
                 with open("users.csv", "r") as file:
                     reader = csv.DictReader(file)
-                    for row in reader:
-                        if user_pin == row["PIN"]:
-                            user_name = row["Name"]
+                    for user in reader:
+                        if user_pin == user["PIN"]:
+                            user_name = user["Name"]
                             auth_complete = True
                             logging.info(
                                 f"AUTHENTICATION_SUCCESSFUL - LOGIN_SUCCESSFULL - USER: {user_name} - PIN: {mask_PIN(user_pin)}"
@@ -95,12 +96,12 @@ def check_balance(user_pin):
     try:
         with open("users.csv", "r") as file:
             reader = csv.DictReader(file)
-            for row in reader:
-                if row["PIN"] == user_pin:
-                    balance = row["Balance"]
+            for user in reader:
+                if user["PIN"] == user_pin:
+                    balance = user["Balance"]
                     print(f"\n✅ Account balance: ${balance}\n")
                     logging.info(
-                        f"BALANCE_CHECK_SUCCESSFUL - USER: {row['Name']} - Balance: ${balance}"
+                        f"BALANCE_CHECK_SUCCESSFUL - USER: {user['Name']} - PIN: {mask_PIN(user_pin)} - BALANCE: ${balance}"
                     )
                     return
         # If loop completes with no match
@@ -108,7 +109,7 @@ def check_balance(user_pin):
     except FileNotFoundError as e:
         file_name = e.filename
         print(f" ⚠️ {file_name} was not found.")
-        logging.error(f"BALANCE_CHECK_FAILED - File not found: {file_name}")
+        logging.error(f"BALANCE_CHECK_FAILED - FileNotFoundError: {file_name}")
 
 
 def deposit(user_pin):
@@ -119,8 +120,8 @@ def deposit(user_pin):
             all_users_list = []
             with open("users.csv", "r") as file:
                 reader = csv.DictReader(file)
-                for row in reader:
-                    all_users_list.append(row)
+                for user in reader:
+                    all_users_list.append(user)
 
                 # loop through the list containing dictionaries of users "all_user_list""
                 for user in all_users_list:
@@ -182,9 +183,9 @@ def withdraw(user_pin):
             all_user_list = []
             with open("users.csv", "r") as file:
                 reader = csv.DictReader(file)
-                for row in reader:
+                for user in reader:
                     # add all user dictionary from csv file to a list
-                    all_user_list.append(row)
+                    all_user_list.append(user)
 
                 # loop through the list containing dictionaries of users "all_user_list""
                 for user in all_user_list:
@@ -257,16 +258,110 @@ def withdraw(user_pin):
                     except FileNotFoundError as e:
                         file_name = e.filename
                         print(f"⚠️ {file_name} not found")
-                        logging.error(f"WITHDRAWAL_FAILED - FILE_NOT_FOUND: {file_name}")
+                        logging.error(
+                            f"WITHDRAWAL - DB_UPDATE_FAILED - FILE_NOT_FOUND: {file_name}"
+                        )
 
         except FileNotFoundError as e:
             file_name = e.filename
             print(f"\n⚠️ {file_name} no found\n")
-            logging.error(f"WITHDRAWAL_FAILED - FILE_NOT_FOUND: {file_name}")
+            logging.error(f"WITHDRAWAL_FAILED - FileNotFoundError: {file_name}")
 
 
-def transfer():
-    pass
+def transfer(user_pin):
+    transfer_successful = False
+    while not transfer_successful:
+        try:
+            # prompt for amount
+            recipient_acct_num = input(">>> Enter reciepient's account number: ")
+
+            # Read all users to a list once and use anywhere
+            with open("users.csv", "r") as file:
+                all_users = list(csv.DictReader(file))
+
+                # Get sender acct num and check for self to self transaction
+                sender_acctNum = None
+                for user in all_users:
+                    if user["PIN"] == user_pin:
+                        sender_acctNum = user["AccountNumber"]
+                        break
+                    
+                if str(recipient_acct_num) == sender_acctNum:
+                    print("⚠️ Cannot transfer to your own account")
+                    logging.warning(
+                        f"SELF_TRANSFER_ATTEMPT - Sender PIN: {mask_PIN(user_pin)} tried to transfer to their own account."
+                    )
+                    return
+
+                # display recipient's details
+                for user in all_users:
+                    if recipient_acct_num ==  user["AccountNumber"]:
+                        receiver_name = user['Name']
+                        print(f"{receiver_name} - {user['AccountNumber']}")
+
+                # prompt for amount to transfer
+                try:
+                    amt_transfer = float(input("\n>>> Enter amount to transfer: "))
+
+                    recipient_found = False
+                    for user in all_users:
+                        if user["PIN"] == user_pin:
+                            sender_name = user["Name"]
+                            sender_bal = float(user["Balance"])
+                            if user["AccountNumber"] == recipient_acct_num:
+                                reciepient_bal = float(user["Balance"])
+                                receiver_name = user["Name"]
+                                recipient_found = True
+                                print(f"{receiver_name} - {recipient_acct_num}")
+
+                                # check for vald trf amount
+                                if amt_transfer <= 0:
+                                    print("⚠️ Enter valid transfer amount")
+                                    return
+                                elif amt_transfer > sender_bal:
+                                    print("⚠️ Insufficient Balance")
+                                    return
+                                else:
+                                    sender_bal -= amt_transfer
+                                    if user["PIN"] == user_pin:
+                                        user["Balance"] = str(sender_bal)
+                                    reciepient_bal += amt_transfer
+                                    if user["AccountNumber"] == recipient_acct_num:
+                                        user["Balance"] = str(reciepient_bal)
+
+
+                                    print(f"\n✅ Transferring ${amt_transfer} to {receiver_name}...\n")
+                                    print(f"\n✅ Transfer Successful \n💸 ${amt_transfer} deducted from your account.\n💸{amt_transfer} added to {receiver_name}'s account")
+
+                                    logging.info(
+                                        f"TRANSFER_SUCCESSFULL - SENDER: {sender_name}- -{mask_PIN(user_pin)} - RECEIVER ACCOUNT: {recipient_acct_num} - NAME: {receiver_name}"
+                                    )
+                                    transfer_successful = True
+
+                            if not recipient_found:
+                                print("⚠️ Recipient not found")
+                                logging.error(("TRANSFER_ATTEMPT_FAILED - RECIPIENT NOT FOUND"))
+                                return
+                except ValueError:
+                    print("⚠️ Invalid input")
+
+            # Update users records
+            if transfer_successful:
+                try:
+                    with open("users.csv", "w") as file:
+                        writer = csv.DictWriter(
+                            file, fieldnames=["PIN", "Name", "Balance", "AccountNumber"]
+                        )
+                        writer.writeheader()
+                        writer.writerows(all_users)
+                except FileNotFoundError as e:
+                    file_name = e.filename
+                    print(f"⚠️ {file_name} not Found")
+                    logging.error(f"TRANSFER - DB_UPDATE_FAILED: FileNotFoundError - {file_name}")
+
+        except ValueError:
+            print("⚠️ Invalid input enter amount ")
+            logging.error("TRANSFER_INTERRUPT - ValueError - Invalid input")
 
 
 def open_account():
@@ -300,8 +395,8 @@ def open_account():
             try:
                 with open("users.csv", "r") as file:
                     reader = csv.DictReader(file)
-                    for row in reader:
-                        if pin == row["PIN"]:
+                    for user in reader:
+                        if pin == user["PIN"]:
                             print("⚠️ This PIN already in use ")
 
                             logging.info(
